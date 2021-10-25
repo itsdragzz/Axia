@@ -21,7 +21,7 @@ module.exports.run = async (client, message, args) => {
 
     const data = await punishments.find({ GuildID: message.guild.id, UserID: member.id });
 
-    if (!data.length) {
+    if (!data.length) { //if there is no data (warns)
         const permEmbed2 = new Discord.MessageEmbed()
             .setDescription(`**This user has no warns**`)
         return message.channel.send({ embeds: [permEmbed2] });
@@ -33,7 +33,7 @@ module.exports.run = async (client, message, args) => {
 
             .setAuthor(member.user.tag, member.user.displayAvatarURL())
             .setDescription(
-                data.map((d) => {
+                data.map((d) => { 
                     return d.Punishments.map(
                         (w, i) =>
                             `**${i + 1}.** **${w.PunishType}**

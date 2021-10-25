@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+
 let PunishmentsSchema = new mongoose.Schema({
     GuildID: String,
     UserID: String,

@@ -1,5 +1,10 @@
 const mongoose = require('mongoose');
 
+
+/**
+ * @public
+ */
+
 let SetupSchema = new mongoose.Schema({
     GuildID: String,
     StaffRoleID: String,

@@ -1,12 +1,21 @@
 const Discord = require("discord.js");
 const setup = require("../../models/setup");
 const { Permissions } = require('discord.js');
-const { MessageActionRow, MessageSelectMenu } = require('discord.js');
+const { MessageActionRow, MessageSelectMenu, MessageButton } = require('discord.js');
 
 module.exports.config = {
     name: "setup",
     aliases: ["set"]
 }
+
+/**
+ * 
+ * @param {string} client 
+ * @param {string} message 
+ * @param {string} args 
+ * @returns 
+ * 
+ */
 
 module.exports.run = async (client, message, args) => {
 

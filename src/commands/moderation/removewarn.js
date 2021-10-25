@@ -14,18 +14,18 @@ module.exports.run = async (client, message, args) => {
 
         
 //runs through all the possibilities
-    if (!message.member.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES)){
+    if (!message.member.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES)){ //if member doesn't have "MANAGE_MESSAGES"
         return message.channel.send(`You don't have the Required Permission!\n**Required Permission: \`MANAGE_MESSAGES\`**`);
-    } else if (!member) { 
+    } else if (!member) {  //if there is no member (didn't mention a person)
         return message.channel.send(`Provide a valid person`);
-    } else if (!args[1]) {
+    } else if (!args[1]) { //if there isn't `args[1]` (which is the case number)
         return message.channel.send(`Please provide a case number`);
     } else {
         
         const data = await punishments.findOne({
             GuildID: message.guild.id,
             UserID: member.id
-        });
+        }); //finding data by GuildID and UserID
 
         if (!data) { //if there is no data
             return message.channel.send(`There is no case number ${args[1]} for that user, please provide a vaild one.`)
