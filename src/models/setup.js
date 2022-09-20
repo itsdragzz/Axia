@@ -11,7 +11,8 @@ let SetupSchema = new mongoose.Schema({
     MuteRoleID: String,
     BlackListRoleID: String,
     SuggestChannelID: String,
-    ReportChannelID: String
+    ReportChannelID: String,
+    Designs: Boolean
     
 });
 

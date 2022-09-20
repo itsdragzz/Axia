@@ -1,12 +1,12 @@
 const Discord = require("discord.js")
 
 module.exports.config = {
-    name: "",
+    name: "test2",
     aliases: []
 }
 
 module.exports.run = async (client, message, args) => {
 
-    //code here
+message.channel.delete();
 
 }

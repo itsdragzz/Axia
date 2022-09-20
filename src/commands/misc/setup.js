@@ -20,7 +20,7 @@ module.exports.config = {
 module.exports.run = async (client, message, args) => {
 
 
-    const data = await setup.findOne({ GuildID: message.guild.id })
+    const data = await setup.findOne({ GuildID: message.guild.id }) //tries to find data
 
     const helpon = new Discord.MessageEmbed()
         .setColor(`#ffffff`)
@@ -32,10 +32,11 @@ module.exports.run = async (client, message, args) => {
             { name: 'Blacklist role', value: '`,setup on blacklist <Mention the role>`', inline: false },
             { name: 'Suggest channel', value: '`,setup on suggest <Mention the channel>`', inline: false },
             { name: 'Report channel', value: '`,setup on report <Mention the channel>`', inline: false },
+            { name: 'Design functions', value: '`,setup on design`', inline: false },
             //{ name: '⚠️DELETE ALL DATA⚠️', value: '`,setup deleteall`', inline: false },
         )
         .setColor("RED")
-        .setFooter(`Asked by ${message.author.tag}`)
+        .setFooter(`Asked by ${message.author.tag} | To set up tickets, run the ticket command`) //for helpon
 
     const helpoff = new Discord.MessageEmbed()
         .setColor(`#ffffff`)
@@ -47,10 +48,11 @@ module.exports.run = async (client, message, args) => {
             { name: 'Blacklist role', value: '`,setup off blacklist`', inline: false },
             { name: 'Suggest channel', value: '`,setup off suggest`', inline: false },
             { name: 'Report channel', value: '`,setup off report`', inline: false },
+            { name: 'Design functions', value: '`,setup off design`', inline: false },
             { name: 'DELETE ALL DATA', value: '`,setup deleteall`', inline: false },
         )
         .setColor("RED")
-        .setFooter(`Asked by ${message.author.tag}`)
+        .setFooter(`Asked by ${message.author.tag} | To set up tickets, run the ticket command`) //for hewlpoff
 
 
 
@@ -73,22 +75,12 @@ module.exports.run = async (client, message, args) => {
                         emoji: '📴'
                     },
                 ])
-        )
+        ) //the dropdown menu
 
 
    // await message.channel.send({ embeds: [helpon], components: [row] })
 
-    client.on("interactionCreate", async (interaction) => {
-        if (interaction.isSelectMenu()) {
-            if (interaction.values[0] == "off") {
-                await interaction.update({ embeds: [helpoff] })
-            } else if (interaction.values[0] == "on") {
-                await interaction.update({ embeds: [helpon] })
-            } else {
-                message.channel.send("There was a problem with the interactrion")
-            }
-        }
-    })
+
 
 /*
     const WrongFormat = new Discord.MessageEmbed()
@@ -112,7 +104,7 @@ module.exports.run = async (client, message, args) => {
     const works = new Discord.MessageEmbed()
         .setColor(`0x00FF00`)
         .setTitle(`Success!`)
-        .setDescription(`Successfully saved ${args[2]} into the database`)
+        .setDescription(`Successfully saved ${args[1]} into the database`)
         .setFooter(`Asked by ${message.author.tag}`)
 
     const worksdelete = new Discord.MessageEmbed()
@@ -125,6 +117,8 @@ module.exports.run = async (client, message, args) => {
         .setTitle('Error!')
         .setDescription(`There is already no data for this command!`)
         .setColor("#ffffff")
+
+        //the embed message for error handling and showing the user that it works
 
 
         
@@ -151,7 +145,15 @@ module.exports.run = async (client, message, args) => {
 
             return message.channel.send({ embeds: [NotEnoughPermsMe] });
 
-            //------------------------------------- start of command -------------------------------------
+            //------------------------------------- start of command -------------------------------------\
+
+
+            //format is 
+            // if arguement 2 is a specific thing
+            // defines the data it needs to save as something
+            //error handing
+            //saves the data
+
         } else {
             if (args[0] === "on") {
                 if (args[1] === "staffrole") {
@@ -310,8 +312,44 @@ module.exports.run = async (client, message, args) => {
                         } else {
                             return message.channel.send("there was an error")
                         }
-                    }
-                } else {
+                    } 
+
+
+                }  else if (args[1] === "design") {//Designs
+                    console.log("")
+
+                    const Datadesigns = await setup.findOne({ GuildID: message.guild.id, Designs: true})
+                    
+                    if (Datadesigns) {
+                        message.channel.send("You've already set up this command!")
+                        await message.channel.send({ embeds: [helpon], components: [row] })
+                    } else {
+                        if (!data) { //IF THERE IS NO DATA
+                            let newData = new setup({
+                                GuildID: message.guild.id,
+                                Designs: true
+                            });
+                            newData.save();
+                            return message.channel.send({ embeds: [works] });
+
+
+                        } else if (data) {// IF THERE IS DATGA
+                            await setup.updateOne({
+                                GuildID: message.guild.id,
+                                Designs: true
+                            });
+
+                            return message.channel.send({ embeds: [works] });
+
+                        } else {
+                            return message.channel.send("there was an error")
+                        }
+                    } 
+
+
+                } 
+                
+                else {
                     await message.channel.send({ embeds: [helpon], components: [row] })
                 }
 
@@ -339,18 +377,41 @@ module.exports.run = async (client, message, args) => {
                 } else if (args[1] === "suggest") {//SuggestChannelID
                     func("SuggestChannelID")
                 } else if (args[1] === "report") {//ReportChannelID 
-                    func("ReportChannelID ")
+                    func("ReportChannelID")
+                } else if (args[1] === "design") {
+                    func("Designs")
+                } else {
+                    return message.channel.send({ embeds: [NoData] });
                 }
 
 
             } else if (args[0] == "deleteall") {
 
-                const data = await setup.findOne({ GuildID: message.guild.id })
-                if (!data) {
+                const dataa = await setup.findOne({ GuildID: message.guild.id })
+                if (!dataa) {
                     return message.channel.send("There is no data to delete");
-                } else if (data) {
-                    await setup.deleteMany({ GuildID: message.guild.id })
-                    return message.channel.send({ embeds: [worksdelete] })
+                } else if (dataa) {
+
+                    const _DelData = new MessageActionRow()
+                    .addComponents(
+                        new MessageButton()
+                            .setCustomId('DelData')
+                            .setLabel('Yes')
+                            .setStyle('DANGER'),
+                    )
+                    .addComponents(
+                        new MessageButton()
+                            .setCustomId('NopeData')
+                            .setLabel('No')
+                            .setStyle('SECONDARY'),
+                    );
+
+
+
+                message.channel.send({ content: `Are you sure you want to **delete all data**`, components: [_DelData] })
+
+                    //await setup.deleteMany({ GuildID: message.guild.id })
+                   // return message.channel.send({ embeds: [worksdelete] })
                 } else {
                     return message.channel.send("There was an error");
                 }
@@ -359,6 +420,35 @@ module.exports.run = async (client, message, args) => {
                 await message.channel.send({ embeds: [helpon], components: [row] })
             }
         }
+
+        client.on("interactionCreate", async (interaction) => {
+            if (interaction.member.id !== message.author.id) return;
+
+            if (interaction.isSelectMenu()) {
+                if (interaction.values[0] == "off") {
+                    await interaction.update({ embeds: [helpoff] })
+                } else if (interaction.values[0] == "on") {
+                    await interaction.update({ embeds: [helpon] })
+                } else {
+                    message.channel.send("There was a problem with the interactrion")
+                } 
+
+            } else if(interaction.isButton()){
+                
+                if (interaction.customId === 'DelData') {
+                    await setup.deleteMany({ GuildID: message.guild.id })
+                    await interaction.update({ content: 'Deleted all data!', components: [], embeds: [worksdelete] });
+
+
+                } else if (interaction.customId === "NopeData") {
+                    await interaction.update({ content: 'No action was taken', components: [] });
+                } else {
+                    return;
+                }
+
+            }
+        })
+
     } catch (error) {
         message.channel.send(`There was an error: ${error}`)
         console.log(error)

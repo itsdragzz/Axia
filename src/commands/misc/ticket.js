@@ -5,6 +5,7 @@ const { MessageActionRow, MessageSelectMenu, MessageButton, MessageEmbed } = req
 const wait = require('util').promisify(setTimeout);
 
 
+
 module.exports.config = {
     name: "ticket",
     aliases: []
@@ -72,13 +73,13 @@ module.exports.run = async (client, message, args) => {
                 const _DelData = new MessageActionRow()
                     .addComponents(
                         new MessageButton()
-                            .setCustomId('DelData')
+                            .setCustomId('aDelData')
                             .setLabel('Yes')
                             .setStyle('DANGER'),
                     )
                     .addComponents(
                         new MessageButton()
-                            .setCustomId('NopeData')
+                            .setCustomId('NoData')
                             .setLabel('No')
                             .setStyle('SECONDARY'),
                     );
@@ -95,7 +96,7 @@ module.exports.run = async (client, message, args) => {
                     .setTitle('Error')
                     .setDescription(`Invaild format`)
                     .setFields(
-                        { name: 'Format:', value: `,ticket <on/off> <catgoryName>`, inline: false },
+                        { name: 'Format:', value: `,ticket <on/off>`, inline: false },
                         { name: 'Example:', value: `,ticket on catgoryName`, inline: false },
                     )
                     .setColor("RED")
@@ -109,16 +110,35 @@ module.exports.run = async (client, message, args) => {
 
             client.on('interactionCreate', async (interaction) => {
 
-                if (interaction.member.id !== message.author.id) return;
+           
                 if (!interaction.isButton()) return;
+                await interaction.deferUpdate();
 
-                if (interaction.customId === 'DelData') {
+                if (interaction.customId === 'NewTicket') {
+                    
+
+                    const overwrites = [{
+                        id: message.guild.roles.everyone.id,
+                        deny: ["VIEW_CHANNEL"],
+                        type: "role"
+                    }, {
+                        id: message.author.id,
+                        allow: ["VIEW_CHANNEL"],
+                        type: "member"
+                    }];
+                
+                    message.guild.channels.create(`ticket - ${interaction.member.displayName} `, {
+                        reason: "for ticket system",
+                        type: "GUILD_TEXT",
+                        permissionOverwrites: overwrites
+                    });
+
+
+                } 
+                else if (interaction.customId === "aDelData") {
+                    //if (interaction.member.id !== message.author.id) return;
                     await ticket.findOneAndDelete({ GuildID: message.guild.id, TicketID: "works" })
-                    await interaction.update({ content: 'Deleted all data!', components: [] });
-
-
-                } else if (interaction.customId == "NopeData") {
-                    await interaction.update({ content: 'No action was taken', components: [] });
+                    await interaction.editReply({ content: 'Deleted the data!', components: [] });
                 }
 
             })

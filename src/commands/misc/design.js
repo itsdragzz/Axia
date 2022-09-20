@@ -1,53 +1,67 @@
 const Discord = require("discord.js")
-const { MessageEmbed } = require('discord.js');
+const { MessageActionRow, MessageSelectMenu, MessageButton, MessageCollector, MessageEmbed } = require('discord.js');
+const setup = require('../../models/setup')
 
 module.exports.config = {
     name: "design",
     aliases: []
 }
 
-
 module.exports.run = async (client, message, args) => {
+    const Datadesigns = await setup.findOne({ GuildID: message.guild.id, Designs: true}) //tries to find the data in the setup model
 
-    const args1 = args.slice(1).join(' ')
+    if(!Datadesigns) return message.channel.send("Please (ask the owner to) set up this command using the `,setup` command") //if there is no design data
 
-    const errorembed = new Discord.MessageEmbed()
-        .setTitle(`Error!`)
-        .setDescription("Please use this format")
-        .setFields(
-            { name: 'Format:', value: `,design <logo/banner/thumbnail> <other relevent information>`, inline: false },
-            { name: 'Example:', value: `,design logo I want a logo with the name "dragz" on it. I want the colours to be red and black, please use this as a reference: https://i.imgur.com/3v37aIh.png%7D`, inline: false },
-        )
-        .setColor("#ffffff")
+    const filter = (m) => m.author.id == message.author.id; //filters it so only the bot colects
 
+    const questions = [
+        "What type of design would you like? (logo/banner/thumbnail/gif)",
+        "What name do you want on the designs? (example: dragz)",
+        "What colours or background do you want in your design (example: I want a black and blue background)",
+        "Is there any other information that you want us to know? (if none, type 'n/a' or 'none')"
+    ] //the questions
 
-    if (!args1) return message.channel.send({ embeds: [errorembed] });
+    let counter = 0;
 
-    if (args[0] == "logo" || args[0] == "banner" || args[0] == "thumbnail") {
+    const collector = new MessageCollector(message.channel, {
+        filter,
+        time: 1000 * 300, //5 mins
+        max: 4,
+        errors: ['time'],
+    }); //puts a filter, time and max amount of entries
+    
+    message.channel.send("You have 5 mins to answer these questions")
+    message.channel.send(questions[counter++]) //incriments the counter by 1 per question
 
-        let embed = new Discord.MessageEmbed()
+    collector.on('collect', (m) => {
+        //m.content 
+        if (counter < questions.length) {
+            m.channel.send(questions[counter++])
+        } //sending the questions
+    });
+
+    collector.on('end', (col) => {
+
+        if (col.size < questions.length) { //if the user didn't answer the questions intime
+            message.reply(`You didn't answer the questoins in the given time frame!`)
+        }
+
+        let count = 0;
+        const embed = new Discord.MessageEmbed()
             .setTitle(`New request!`)
-            //.setAuthor(message.author.tag, message.author.displayAvatarURL())
-            //.setDescription(args1)
-            .addFields(
-                { name: 'Client name:', value: `${message.author.tag}`, inline: false },
-                { name: 'Type of design:', value: `${args[0]}`, inline: false },
-                { name: 'Information:', value: `${args1}`, inline: false },
-            )
+            .setDescription(`**Clients username:** ${message.author.tag} \n `)
             .setColor("RANDOM")
             .setTimestamp()
-            .setFooter(`Thanks for requesting at ${message.guild.name}`)
+            //.setFooter(`Thanks for requesting at ${message.guild.name}`)
+            .setFooter(`Estimated time of delivery is 2-7 days. If you would to speed this up you may need to pay or invite more people. (2 invites per day shaved of delivery time)`)
 
-        message.channel.send({ embeds: [embed] });
+        col.forEach((value) => {
+            embed.addField(`${questions[count++]}:`, `${value.content}`, false)
+        }) //for each value it creates a new field and and displays the questoin and answer
 
-    } else {
-        return message.channel.send({ embeds: [errorembed] })
-    }
-
+        message.channel.send({ embeds: [embed] })
+    })
 
 }
 
-
-//send specific message for a specific bot
-//private command, only the owner can access it
 
